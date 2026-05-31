@@ -1,53 +1,100 @@
-# Import Flask framework and helper functions
 from flask import Flask, request, render_template_string
 
-# Create a Flask application instance
 app = Flask(__name__)
 
-# Define a small dictionary of valid words for the game
+# Dictionary of valid words
 dictionary = {"cat", "cot", "dot", "dog"}
 
-# HTML template for the game page (inline for simplicity)
+# HTML template with instructions and CSS styling
 html_template = """
 <!doctype html>
-<title>Word Ladder Game</title>
-<h2>Word Ladder: CAT → DOG</h2>
-<form method="post">
-  <input type="text" name="word" placeholder="Enter next word">
-  <input type="submit" value="Submit">
-</form>
-<p>{{ message }}</p>
+<html>
+<head>
+  <title>Word Ladder Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      color: #333;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    .instructions {
+      background: #ecf0f1;
+      border: 1px solid #bdc3c7;
+      padding: 15px;
+      margin: 20px auto;
+      width: 60%;
+      border-radius: 8px;
+    }
+    form {
+      margin-top: 20px;
+    }
+    input[type=text] {
+      padding: 10px;
+      width: 200px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    input[type=submit] {
+      padding: 10px 20px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    input[type=submit]:hover {
+      background: #2980b9;
+    }
+    .message {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #27ae60;
+    }
+  </style>
+</head>
+<body>
+  <h1>🪜 Word Ladder Game</h1>
+  <div class="instructions">
+    <p><strong>Goal:</strong> Transform <b>CAT</b> into <b>DOG</b>.</p>
+    <ul style="text-align:left; display:inline-block;">
+      <li>Change only <b>one letter</b at a time.</li>
+      <li>Each step must be a valid word.</li>
+      <li>Reach the target word to win 🎉.</li>
+    </ul>
+  </div>
+  <form method="post">
+    <input type="text" name="word" placeholder="Enter next word">
+    <input type="submit" value="Submit">
+  </form>
+  <div class="message">{{ message }}</div>
+</body>
+</html>
 """
 
-# Track the current word in the game (starting point)
 current_word = "cat"
 
-# Define the main route (homepage) for the game
 @app.route("/", methods=["GET", "POST"])
 def game():
-    global current_word  # Use the global variable to track progress
-    message = f"Current word: {current_word}"  # Default message
-
-    # Handle form submission
+    global current_word
+    message = f"Current word: {current_word}"
     if request.method == "POST":
-        guess = request.form["word"].lower()  # Get user input and lowercase it
-
-        # Check if the guess is in the dictionary
+        guess = request.form["word"].lower()
         if guess not in dictionary:
-            message = "Not a valid word!"
-        # Check if only one letter is different
+            message = "❌ Not a valid word!"
         elif sum(a != b for a, b in zip(current_word, guess)) == 1:
-            current_word = guess  # Update current word
-            if current_word == "dog":  # Check if target reached
+            current_word = guess
+            if current_word == "dog":
                 message = "🎉 Congratulations! You reached DOG!"
             else:
-                message = f"Good move! Current word: {current_word}"
+                message = f"✅ Good move! Current word: {current_word}"
         else:
-            message = "You must change only one letter!"
-
-    # Render the HTML template with the message
+            message = "⚠️ You must change only one letter!"
     return render_template_string(html_template, message=message)
 
-# Run the app on port 5000, accessible from all network interfaces
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
